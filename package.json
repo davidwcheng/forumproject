@@ -21,6 +21,7 @@
     "@mikro-orm/core": "^4.5.7",
     "@mikro-orm/migrations": "^4.5.7",
     "@mikro-orm/postgresql": "^4.5.7",
+    "nodemon": "^2.0.12",
     "pg": "^8.7.1"
   }
 }
