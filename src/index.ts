@@ -7,10 +7,10 @@ const main = async () => {
     
     const orm = await MikroORM.init(microConfig);
     //await orm.getMigrator().up();
-    const post = orm.em.create(Post, {title: 'first post'});
-    await orm.em.persistAndFlush(post);
-    await orm.em.nativeInsert(Post, {title: 'second post'});
-
+    // const post = orm.em.create(Post, {title: 'first post'});
+    // await orm.em.persistAndFlush(post);
+    const posts = await orm.em.find(Post,{});
+    console.log(posts)
 };
 
 main().catch(err => {
