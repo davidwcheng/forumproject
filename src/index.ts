@@ -17,11 +17,11 @@ const main = async () => {
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [HelloResolver],
-            validate: false,
+            validate: false
         })
     });
 
-    apolloServer.applyMiddleware({app});
+    apolloServer.applyMiddleware({ app });
 
     app.listen(4000, () => {
         console.log('server started on localhost:4000')
