@@ -7,6 +7,7 @@ import {ApolloServer} from 'apollo-server-express'
 import {buildSchema} from 'type-graphql'
 import { HelloResolver } from "./resolvers/hello";
 
+
 const main = async () => {
     
     const orm = await MikroORM.init(microConfig);
@@ -20,11 +21,11 @@ const main = async () => {
             validate: false
         })
     });
-
+    //await apolloServer.start()
     apolloServer.applyMiddleware({ app });
 
-    app.listen(4000, () => {
-        console.log('server started on localhost:4000')
+    app.listen(4001, () => {
+        console.log('server started on localhost:4001')
     })
 };
 
