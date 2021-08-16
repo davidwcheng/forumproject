@@ -13,7 +13,7 @@ class UsernamePasswordInput{
 }
 @Resolver()
 export class UserResolver{
-    @Mutation(() => String)
+    @Mutation(() => User)
     async register(
         @Arg("options") options: UsernamePasswordInput,
         @Ctx() {em}: MyContext
@@ -21,6 +21,6 @@ export class UserResolver{
         const hashedPassword = await argon2.hash(options.password)
         const user = em.create(User, {username: options.username, password: hashedPassword});
         await em.persistAndFlush(user);
-        return "boi";
+        return user;
     }
 }   
