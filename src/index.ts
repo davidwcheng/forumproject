@@ -24,11 +24,11 @@ const main = async () => {
         }),
         context: () => ({ em: orm.em })
     });
-    await apolloServer.start()
+    await apolloServer.start();
     apolloServer.applyMiddleware({ app });
 
     app.listen(3000, () => {
-        console.log('server started on localhost:3000')
+        console.log('server started on localhost:3000');
     })
 };
 
