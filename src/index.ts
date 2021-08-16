@@ -21,7 +21,7 @@ const main = async () => {
             validate: false
         })
     });
-    //await apolloServer.start()
+    await apolloServer.start()
     apolloServer.applyMiddleware({ app });
 
     app.listen(4001, () => {
