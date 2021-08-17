@@ -32,7 +32,7 @@ class UserResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => [Error], { nullable: true })
+  @Field(() => User, { nullable: true })
   user?: User;
 }
 @Resolver()
@@ -41,7 +41,25 @@ export class UserResolver {
   async register(
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
-  ) {
+  ): Promise<UserResponse> {
+    if(options.username.length <= 2){
+      return {
+        errors: [{
+          field: 'username',
+          message: 'username is too short, length of 3 or more'
+        }]
+      }
+    }
+
+    if(options.password.length <= 3){
+      return {
+        errors: [{
+          field: 'password',
+          message: 'password is too short, length of 4 or more'
+        }]
+      }
+    }
+   
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       username: options.username,
@@ -49,7 +67,7 @@ export class UserResolver {
     });
 
     await em.persistAndFlush(user);
-    return user;
+    return {user};
   }
 
   @Mutation(() => UserResponse)
@@ -76,6 +94,6 @@ export class UserResolver {
         };
     }
     
-    return {user,};
+    return {user};
   }
 }
