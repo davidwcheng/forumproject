@@ -48,7 +48,7 @@ export class UserResolver {
           field: 'username',
           message: 'username is too short, length of 3 or more'
         }]
-      }
+      };
     }
 
     if(options.password.length <= 3){
@@ -57,7 +57,7 @@ export class UserResolver {
           field: 'password',
           message: 'password is too short, length of 4 or more'
         }]
-      }
+      };
     }
    
     const hashedPassword = await argon2.hash(options.password);
