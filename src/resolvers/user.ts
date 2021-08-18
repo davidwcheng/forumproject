@@ -37,11 +37,12 @@ class UserResponse {
 }
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
   ): Promise<UserResponse> {
+
     if(options.username.length <= 2){
       return {
         errors: [{
@@ -65,8 +66,20 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
     });
-
-    await em.persistAndFlush(user);
+    try{
+      await em.persistAndFlush(user);
+    } catch (e){
+      //duplicate username
+      if (e.code === "23505") {// || e.detail.includes("already exists")){
+        return {
+          errors: [{
+            field: "username",
+            message: "that username already exists"
+          }]
+        };
+      }
+      
+    }
     return {user};
   }
 
