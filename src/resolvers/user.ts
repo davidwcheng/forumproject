@@ -6,6 +6,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from "type-graphql";
 import { User } from "../entities/User";
@@ -35,78 +36,111 @@ class UserResponse {
   @Field(() => User, { nullable: true })
   user?: User;
 }
+// lemme just double check
 @Resolver()
 export class UserResolver {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req, em }: MyContext) {
+    console.log(req.session.userId);
+    console.log(req.session);
+    
+    if (!req.session.userId) {
+      return null;
+    }
+    console.log(`User's id is ${req.session.userId}`);
+    // he switches from mikrorm to typeorm later in the video, just a heads up
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-
-    if(options.username.length <= 2){
+    if (options.username.length <= 2) {
       return {
-        errors: [{
-          field: 'username',
-          message: 'username is too short, length of 3 or more'
-        }]
+        errors: [
+          {
+            field: "username",
+            message: "username is too short, length of 3 or more",
+          },
+        ],
       };
     }
 
-    if(options.password.length <= 3){
+    if (options.password.length <= 3) {
       return {
-        errors: [{
-          field: 'password',
-          message: 'password is too short, length of 4 or more'
-        }]
+        errors: [
+          {
+            field: "password",
+            message: "password is too short, length of 4 or more",
+          },
+        ],
       };
     }
-   
+
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       username: options.username,
       password: hashedPassword,
     });
-    try{
+    try {
       await em.persistAndFlush(user);
-    } catch (e){
+    } catch (e) {
       //duplicate username
-      if (e.code === "23505") {// || e.detail.includes("already exists")){
+      if (e.code === "23505") {
+        // || e.detail.includes("already exists")){
         return {
-          errors: [{
-            field: "username",
-            message: "that username already exists"
-          }]
+          errors: [
+            {
+              field: "username",
+              message: "that username already exists",
+            },
+          ],
         };
       }
-      
     }
-    return {user};
+    req.session.userId = user.id;
+
+    return { user };
   }
 
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: options.username });
     if (!user) {
       return {
-        errors: [{
+        errors: [
+          {
             field: "username",
-            message: "invalid login, try again"
-          }],
+            message: "invalid login, try again",
+          },
+        ],
       };
     }
     const valid = await argon2.verify(user.password, options.password);
-    if(!valid){
-        return{
-            errors: [{
-                field:"password",
-                message:"invalid login, try again"
-            }]
-        };
+    if (!valid) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "invalid login, try again",
+          },
+        ],
+      };
     }
+
+    console.log("Logged in");
     
-    return {user};
+    req.session.userId = user.id;
+
+    console.log(`Req ${req.session.userId}`);
+    
+
+    return { user };
   }
 }
