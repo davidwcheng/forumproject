@@ -43,7 +43,7 @@ export class UserResolver {
   async me(@Ctx() { req, em }: MyContext) {
     console.log(req.session.userId);
     console.log(req.session);
-    
+
     if (!req.session.userId) {
       return null;
     }
@@ -89,8 +89,7 @@ export class UserResolver {
       await em.persistAndFlush(user);
     } catch (e) {
       //duplicate username
-      if (e.code === "23505") {
-        // || e.detail.includes("already exists")){
+      if (e.detail.includes("already exists")) {
         return {
           errors: [
             {
@@ -135,11 +134,10 @@ export class UserResolver {
     }
 
     console.log("Logged in");
-    
+
     req.session.userId = user.id;
 
     console.log(`Req ${req.session.userId}`);
-    
 
     return { user };
   }
